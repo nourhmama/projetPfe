@@ -1,10 +1,14 @@
 <?php
+
 namespace App\Http\Controllers\Api;
+
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
+use Illuminate\Validation\Rule;
 
-class CrudController extends Controller
+class UserController extends Controller
 {
     // Lire tous les utilisateurs
     public function index()
@@ -28,7 +32,13 @@ class CrudController extends Controller
         // Valider les données mises à jour
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('users')->ignore($user->id),
+            ],
             'entreprise' => 'required|string|max:255',
             'phone' => 'required|numeric|digits_between:8,8',
         ]);
