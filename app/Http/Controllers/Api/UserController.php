@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -23,6 +25,30 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         return response()->json(['user' => $user]);
     }
+
+   // Créer un utilisateur
+public function store(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users',
+        'entreprise' => 'required|string|max:255',
+        'phone' => 'required|numeric|digits_between:8,8',
+        'password' => ['required', 'confirmed'],
+    ], [
+        'phone.digits_between' => 'Le champ téléphone doit contenir exactement 8 chiffres.',
+    ]);
+
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'entreprise' => $request->entreprise,
+        'phone' => $request->phone,
+        'password' => Hash::make($request->password),
+    ]);
+
+    return response()->json(['message' => 'User created', 'user' => $user]);
+}
 
     // Mettre à jour un utilisateur
     public function update(Request $request, $id)
