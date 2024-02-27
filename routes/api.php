@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\NewPasswordController;
 use App\Http\Controllers\Api\UserController;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Auth\LoginRequest;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,15 +27,17 @@ Route::middleware('auth:sanctum','verified')->get('/user', function (Request $re
 
 
 
-Route::middleware('auth:sanctum')->group(function () {
+
     // Authentification User 
-    Route::post('login', [AuthController::class, 'login']);
+    Route::post('login', [AuthController::class, 'login'])->name('login');
+
+
     Route::post('register', [AuthController::class, 'register']);
-    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
     // Vérification email
-    Route::post('email/verification-notification', [EmailVerificationController::class, 'sendVerificationEmail']);
-    Route::get('verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify'])->name('verification.verify');
+    Route::post('email/verification-notification', [EmailVerificationController::class, 'sendVerificationEmail'])->middleware('auth:sanctum');
+    Route::get('verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify'])->name('verification.verify')->middleware('auth:sanctum');
 
     // Oublier password
     Route::post('forgot-password', [NewPasswordController::class, 'forgotPassword']);
@@ -44,4 +48,3 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('users/{id}', [UserController::class, 'show']);
     Route::put('users/{id}', [UserController::class, 'update']);
     Route::delete('users/{id}', [UserController::class, 'destroy']);
-});
