@@ -16,21 +16,23 @@ class AuthController extends Controller
     {
         try {
             $request->validate([
-                'name' => 'required|string|max:255',
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'company' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
-                'entreprise' => 'required|string|max:255',
-                'phone' => 'required|numeric|digits_between:8,8',
+                'phone_number' => 'required|numeric|digits_between:8,8',
                 'password' => ['required', 'confirmed', Password::defaults()],
             ], [
-                'phone.digits_between' => 'Le champ téléphone doit contenir exactement 8 chiffres.',
+                'phone_number.digits_between' => 'Le champ téléphone doit contenir exactement 8 chiffres.',
             ]);
     
             $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'entreprise' => $request->entreprise,
-                'phone' => $request->phone,
-                'password' => Hash::make($request->password),
+                'first_name' => $request->input('first_name'),
+                'last_name' => $request->input('last_name'),
+                'company' => $request->input('company'),
+                'email' => $request->input('email'),
+                'phone_number' => $request->input('phone_number'),
+                'password' => Hash::make($request->input('password')),
             ]);
     
             event(new Registered($user));
@@ -48,35 +50,27 @@ class AuthController extends Controller
             ], 500);
         }
     }
+    
     public function login(LoginRequest $request)
     {
         $request->authenticate();
-
-
         $token = $request->user()->createToken('authtoken');
-
-       return response()->json(
-           [
-               'message'=>'Logged Welcome',
-               'data'=> [
-                   'user'=> $request->user(),
-                   'token'=> $token->plainTextToken
-               ]
-           ]
-        );
+        
+        return response()->json([
+            'message' => 'Logged Welcome',
+            'data' => [
+                'user' => $request->user(),
+                'token' => $token->plainTextToken
+            ]
+        ]);
     }
 
     public function logout(Request $request)
     {
-
         $request->user()->tokens()->delete();
-
-        return response()->json(
-            [
-                'message' => 'Logged out'
-            ]
-        );
-
+        
+        return response()->json([
+            'message' => 'Logged out'
+        ]);
     }
-
 }

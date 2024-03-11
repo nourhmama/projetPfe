@@ -25,7 +25,11 @@ Route::middleware('auth:sanctum','verified')->get('/user', function (Request $re
     return $request->user();
 });
 
-
+Route::middleware(['auth','role:admin'])->group(function(){
+  Route::get('/login',function(){
+    return 'BONJOUR admin';
+  });
+});
 
 
     // Authentification User 
@@ -33,7 +37,7 @@ Route::middleware('auth:sanctum','verified')->get('/user', function (Request $re
 
 
     Route::post('register', [AuthController::class, 'register']);
-    Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+    Route::delete('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
     // Vérification email
     Route::post('email/verification-notification', [EmailVerificationController::class, 'sendVerificationEmail'])->middleware('auth:sanctum');
