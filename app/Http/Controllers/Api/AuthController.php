@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Auth;
+
 
 class AuthController extends Controller
 {
@@ -25,7 +27,7 @@ class AuthController extends Controller
             ], [
                 'phone_number.digits_between' => 'Le champ téléphone doit contenir exactement 8 chiffres.',
             ]);
-    
+
             $user = User::create([
                 'first_name' => $request->input('first_name'),
                 'last_name' => $request->input('last_name'),
@@ -33,12 +35,13 @@ class AuthController extends Controller
                 'email' => $request->input('email'),
                 'phone_number' => $request->input('phone_number'),
                 'password' => Hash::make($request->input('password')),
+                'role' => 'user',
             ]);
-    
+
             event(new Registered($user));
-    
+
             $token = $user->createToken('authtoken');
-    
+
             return response()->json([
                 'message' => 'User Registered',
                 'data' => ['token' => $token->plainTextToken, 'user' => $user]
@@ -50,12 +53,12 @@ class AuthController extends Controller
             ], 500);
         }
     }
-    
+
     public function login(LoginRequest $request)
     {
         $request->authenticate();
         $token = $request->user()->createToken('authtoken');
-        
+
         return response()->json([
             'message' => 'Logged Welcome',
             'data' => [
@@ -68,9 +71,29 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->tokens()->delete();
-        
+
         return response()->json([
             'message' => 'Logged out'
         ]);
     }
+    public function adminLogin(Request $request)
+    {
+        // Validation des données de la requête
+        $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required|string',
+        ]);
+
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password, 'role' => 'admin'])) {
+            $admin = Auth::user();
+            $token = $admin->createToken('authToken')->plainTextToken;
+            return response()->json([
+                'user' => $admin, // Renvoyer les données de l'utilisateur
+                'token' => $token, // Renvoyer le token
+            ]);
+        }
+
+        return response()->json(['error' => 'Invalid credentials'], 401);
+    }
+
 }

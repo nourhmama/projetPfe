@@ -25,12 +25,9 @@ Route::middleware('auth:sanctum','verified')->get('/user', function (Request $re
     return $request->user();
 });
 
-Route::middleware(['auth','role:admin'])->group(function(){
-  Route::get('/login',function(){
-    return 'BONJOUR admin';
-  });
-});
-
+Route::get('/admin/dashboard', function () {
+    //
+})->middleware(['auth', 'role:admin']);
 
     // Authentification User 
     Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -53,3 +50,8 @@ Route::middleware(['auth','role:admin'])->group(function(){
     Route::post('/users', [UserController::class, 'store']);
     Route::put('users/{id}', [UserController::class, 'update']);
     Route::delete('users/{id}', [UserController::class, 'destroy']);
+
+    //route pour l'admin
+    Route::post('admin/login', [AuthController::class, 'adminLogin']);
+    Route::delete('admin/logout', [AuthController::class, 'adminLogout'])->middleware('auth:sanctum');
+    
