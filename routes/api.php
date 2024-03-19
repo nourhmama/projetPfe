@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\NewPasswordController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\ContractController;
+
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Auth\LoginRequest;
 
@@ -29,7 +31,7 @@ Route::get('/admin/dashboard', function () {
     //
 })->middleware(['auth', 'role:admin']);
 
-    // Authentification User 
+    // Authentification User
     Route::post('login', [AuthController::class, 'login'])->name('login');
 
 
@@ -54,4 +56,9 @@ Route::get('/admin/dashboard', function () {
     //route pour l'admin
     Route::post('admin/login', [AuthController::class, 'adminLogin']);
     Route::delete('admin/logout', [AuthController::class, 'adminLogout'])->middleware('auth:sanctum');
-    
+ // Routes pour les contracts
+Route::get('contracts', [ContractController::class, 'index']);
+Route::get('contracts/{contract}', [ContractController::class, 'show']);
+Route::post('contracts', [ContractController::class, 'store']);
+Route::put('contracts/{contract}', [ContractController::class, 'update']);
+Route::delete('contracts/{contract}', [ContractController::class, 'destroy']);
